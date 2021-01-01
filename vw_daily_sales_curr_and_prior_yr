@@ -1,0 +1,50 @@
+CREATE VIEW [dbo].[vw_daily_sales_curr_and_prior_yr]
+AS select
+/*
+Change Log: 
+1/30/2020 - added Msb - monthly sales Budget to view
+*/ 
+s.SiteNo 
+,d.date 
+,cy.OrderDate
+,cy.DayName
+,cy.IsHoliday
+,d.CalendarYear
+,d.CalendarMonth
+,s.SiteName +'('+s.SiteNo +')' as SiteName
+,s.SiteDistrictKey
+,s.SiteDistrictName
+,s.SiteRegionKey
+, s.SiteRegionName
+, isnull(cy.Net$,0) as Net$
+, isnull(cy.Cost,0) as Cost
+, isnull(cy.Margin$,0) as Margin$
+, isnull(cy.Gallons,0) as Gallons
+, isnull(cy.SalesBudgetAmt,0) as SalesBudgetAmt
+,isnull(cy.SalesBudgetAmt,0) as TargetValue
+,py.DayName as DayName_PY
+,py.IsHoliday as IsHoliday_PY
+, py.Net$ as Net$_PY
+, py.Cost as Cost_PY
+, py.Margin$ as Margin$_PY
+, py.Gallons as Gallons_PY
+,msb.Curr_Month_SalesBudget
+
+from
+dbo.vw_daily_sales_curr_yr as cy
+left outer join 
+dbo.vw_daily_sales_prior_yr as py on cy.siteskid = py.siteskid and cy.dateskid = py.DateSkid_nextYear
+left outer join
+dbo.d_site s on cy.siteSKID = s.SiteSkId
+left outer join 
+dbo.d_date d on cy.dateskid = d.DateSkId
+left outer join 
+(--Monthly Sales Budgets by site 
+select fsb.SiteSkId, d.CalendarMonth, d.CalendarYear, sum(fsb.SalesBudgetAmt) as Curr_Month_SalesBudget
+from dbo.F_SALES_BUDGET fsb 
+join dbo.d_date d on fsb.DateSkId = d.DateSkId 
+group by 
+fsb.SiteSkId, d.CalendarMonth, d.CalendarYear
+) msb on s.SiteSkId = msb.SiteSkId
+and d.CalendarMonth = msb.CalendarMonth
+and d.CalendarYear = msb.CalendarYear;
