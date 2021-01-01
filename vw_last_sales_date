@@ -1,0 +1,8 @@
+create view vw_last_sales_date as
+select 
+	d.dateskid
+	, d.date last_sale_date
+	, d.CalendarYear as current_sales_year
+	, d.CalendarYear-1 as prior_sales_year
+    from dbo.d_date d 
+    where d.dateskid = (select max(dateskid) from dbo.f_pos)
