@@ -1,0 +1,62 @@
+CREATE VIEW [dbo].[vw_daily_sales_curr_yr]
+AS select 
+--CURRENT YEAR 
+x.DateSkid
+,x.SiteSKid
+,x.DayName
+,x.IsHoliday
+,p.OrderDate
+,p.Net$ 
+,p.Cost 
+,p.Margin$
+,p.Gallons
+,fsb.SalesBudgetAmt
+
+ from 
+(--One row per Active Site per day - Current SALES YTD
+select  
+ d.Dateskid
+,s.SiteSkId
+,d.DayName
+,d.IsHoliday
+
+from 
+d_site s
+join dbo.d_date d  on 1=1
+join dbo.vw_last_sales_date lsd on d.CalendarYear = lsd.current_sales_year 
+
+where s.siteStatus = 'ACTIVE' and s.siteDistrictKey like 'D%'
+and  d.date <= lsd.last_sale_date
+
+
+) x  
+ left outer join 
+ 	dbo.vw_daily_Store_Budgets fsb -- dbo.F_SALES_BUDGET fsb  
+ 	on x.siteskid = fsb.SiteSkId and x.dateskid = fsb.DateSkId
+left outer join 
+(--Actual Sales
+select  
+p.SiteSKId
+,p.DateSkId
+,d.date as OrderDate
+, sum(p.ExtendedPrice) as Net$ 
+, sum(p.ExtendedCost) as Cost 
+, sum(p.ExtendedPrice - p.ExtendedCost) as Margin$ 
+,sum(p.Gallons) Gallons
+
+from 
+ f_pos p
+join d_date d on d.DateSkId = p.DateSkId
+join d_site s on p.SiteSKId = s.SiteSkId
+join d_item i on i.ItemSkId = p.ItemSkId
+join dbo.vw_last_sales_date lsd on d.CalendarYear  = lsd.current_sales_year
+where 
+ i.ItemDeptNo in ('100','200','300','400','506','507')
+group by 
+p.SiteSKId
+,p.DateSkId
+,d.date
+
+) p 
+on x.siteskid = p.siteskid
+and  x.dateskid =p.dateskid;
