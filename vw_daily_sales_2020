@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vw_daily_sales_curr_yr]
+CREATE VIEW [dbo].[vw_daily_sales_2020]
 AS select 
 --CURRENT YEAR 
 x.DateSkid
@@ -13,7 +13,7 @@ x.DateSkid
 ,fsb.SalesBudgetAmt
 
  from 
-(--One row per Active Site per day - Current SALES YTD
+(--One row per  Site per day - 2020 SALES YTD
 select  
  d.Dateskid
 ,s.SiteSkId
@@ -23,17 +23,15 @@ select
 from 
 d_site s
 join dbo.d_date d  on 1=1
-join dbo.vw_last_sales_date lsd on d.CalendarYear = lsd.current_sales_year 
+--join dbo.vw_last_sales_date lsd on d.CalendarYear = lsd.current_sales_year 
 
-where s.siteStatus = 'ACTIVE' and s.siteDistrictKey like 'D%'
-and  d.date <= lsd.last_sale_date
-
+where d.CalendarYear = 2020 and siteskid <> -1
 
 ) x  
  left outer join 
  	dbo.vw_daily_Store_Budgets fsb -- dbo.F_SALES_BUDGET fsb  
  	on x.siteskid = fsb.SiteSkId and x.dateskid = fsb.DateSkId
-left outer join 
+ join 
 (--Actual Sales
 select  
 p.SiteSKId
@@ -49,9 +47,10 @@ from
 join d_date d on d.DateSkId = p.DateSkId
 join d_site s on p.SiteSKId = s.SiteSkId
 join d_item i on i.ItemSkId = p.ItemSkId
-join dbo.vw_last_sales_date lsd on d.CalendarYear  = lsd.current_sales_year
+--join dbo.vw_last_sales_date lsd on d.CalendarYear  = lsd.current_sales_year
 where 
  i.ItemDeptNo in ('100','200','300','400','506','507')
+ and  d.CalendarYear = 2020
 group by 
 p.SiteSKId
 ,p.DateSkId
