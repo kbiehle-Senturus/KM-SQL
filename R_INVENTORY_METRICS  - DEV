@@ -441,7 +441,7 @@ from
 (
 	select 
 		x.siteskid
-		,x.MonthCode+1 as NextMonthCode
+		,case when x.calendarMonth = 12 then (x.MonthCode+1)+88 else monthcode+1 end as NextMonthCode
 		,x.daily_COGS
 		,sum(x.daily_COGS) OVER ( PARTITION BY x.siteskid  ORDER BY x.MonthCode rows BETWEEN 11 preceding  AND CURRENT row ) AS COGS_12months
 	
