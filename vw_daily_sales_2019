@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vw_daily_sales_prior_yr]
+CREATE VIEW [dbo].[vw_daily_sales_2019]
 AS select 
 x.dateskid+10000 as DateSkid_nextYear
 ,x.DateSkid
@@ -22,13 +22,11 @@ select
 from 
 d_site s
 join dbo.d_date d  on 1=1
-join dbo.vw_last_sales_date lsd on d.CalendarYear = lsd.prior_sales_year 
 
-where s.siteStatus = 'ACTIVE' and s.siteDistrictKey like 'D%'
-and  d.date <= lsd.last_sale_date
+where d.CalendarYear = 2019 and SiteSkId <> -1
 ) x  
 
-left outer join 
+join 
 (--Actual Sales
 select  
 p.SiteSKId
@@ -44,9 +42,10 @@ from
 join d_date d on d.DateSkId = p.DateSkId
 join d_site s on p.SiteSKId = s.SiteSkId
 join d_item i on i.ItemSkId = p.ItemSkId
-join dbo.vw_last_sales_date lsd on d.CalendarYear = lsd.prior_sales_year 
+
 where 
  i.ItemDeptNo in ('100','200','300','400','506','507')
+and d.CalendarYear = 2019 
 group by 
 p.SiteSKId
 ,p.DateSkId
