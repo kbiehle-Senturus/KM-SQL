@@ -1,8 +1,8 @@
-CREATE VIEW [dbo].[vw_daily_sales_curr_and_prior_yr]
+CREATE VIEW [dbo].[vw_daily_sales_2020_and_2019]
 AS select
 /*
 Change Log: 
-1/30/2020 - added Msb - monthly sales Budget to view
+Created from daily view (vw_daily_sales_curr_and_prior_yr) for Year-end snapshot of 2020 where prior= 2019
 */ 
 s.SiteNo 
 ,d.date 
@@ -31,9 +31,9 @@ s.SiteNo
 ,msb.Curr_Month_SalesBudget
 
 from
-dbo.vw_daily_sales_curr_yr as cy
+dbo.vw_daily_sales_2020 as cy
 left outer join 
-dbo.vw_daily_sales_prior_yr as py on cy.siteskid = py.siteskid and cy.dateskid = py.DateSkid_nextYear
+dbo.vw_daily_sales_2019 as py on cy.siteskid = py.siteskid and cy.dateskid = py.DateSkid_nextYear
 left outer join
 dbo.d_site s on cy.siteSKID = s.SiteSkId
 left outer join 
