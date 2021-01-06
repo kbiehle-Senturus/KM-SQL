@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vw_daily_sales_2020]
+create VIEW [dbo].[vw_daily_sales_2020]
 AS select 
 --CURRENT YEAR 
 x.DateSkid
@@ -25,13 +25,14 @@ d_site s
 join dbo.d_date d  on 1=1
 --join dbo.vw_last_sales_date lsd on d.CalendarYear = lsd.current_sales_year 
 
-where d.CalendarYear = 2020 and siteskid <> -1
+where d.CalendarYear = 2020 
+--and siteskid <> -1
 
 ) x  
  left outer join 
  	dbo.vw_daily_Store_Budgets fsb -- dbo.F_SALES_BUDGET fsb  
  	on x.siteskid = fsb.SiteSkId and x.dateskid = fsb.DateSkId
- join 
+ left outer join 
 (--Actual Sales
 select  
 p.SiteSKId
