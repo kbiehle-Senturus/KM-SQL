@@ -1,3 +1,4 @@
+
 /*
  * R_INVENTORY_METRICS table load Script to KMDWH_DEV
  * 
@@ -12,8 +13,6 @@ select
 from 
 (select dateskid from KMDWH_DEV.dbo.d_date where dateskid = 20200101 group by dateskid) a
 ;
-
-
 
 
 
@@ -250,8 +249,10 @@ a.siteskid
 		,cast(CASE  WHEN a.QOH_Value_90D_avg > 0 THEN b.prior_365_COGS / a.QOH_Value_90D_avg
 				ELSE 0 END AS DECIMAL(10, 3)) AS Turns
 		,cast(b.Prior_365_QTY / 365 AS DECIMAL(10, 3)) AS Qty_Sold_per_day --300 = Number of retail days
-		,cast(a.QOH_qty / CASE WHEN b.Prior_365_QTY > 0 THEN cast(b.Prior_365_QTY / 360 AS DECIMAL(10, 3))
-				ELSE 1 END AS DECIMAL(10, 3)) AS days_on_hand
+		,cast(CASE WHEN b.Prior_365_QTY = 0 then 365 else a.QOH_qty / cast(b.Prior_365_QTY / 360 AS DECIMAL(10, 3))
+			END AS DECIMAL(10, 3)) AS days_on_hand
+		/*,cast(a.QOH_qty / CASE WHEN b.Prior_365_QTY > 0 THEN cast(b.Prior_365_QTY / 360 AS DECIMAL(10, 3))
+				ELSE 1 END AS DECIMAL(10, 3)) AS days_on_hand*/
 		,0 as InvAdj_Value
 
 		into  #temp_InventoryMetrics_SKUDetail
@@ -1526,6 +1527,8 @@ Insert into KMDWH_DEV.dbo.R_Inventory_Metrics_Company select *  from #temp_Inven
 			from 
 			(select dateskid from KMDWH_DEV.dbo.d_date where dateskid = 20200101 group by dateskid) a
 			;
+
+		
 
 
 		insert into KMDWH_DEV.dbo.R_Script_Process_Log
